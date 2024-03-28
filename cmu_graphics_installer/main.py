@@ -69,10 +69,9 @@ def onMousePress (mouseX, mouseY):
             
             
         
-    
-    
-        
-        
+print("hi")
+
+
 def onStep():
     if Title.centerY - 10 > 80:
         Title.centerY -=15
