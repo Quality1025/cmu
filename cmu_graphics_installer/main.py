@@ -1,54 +1,67 @@
 from cmu_graphics import *
-import random
-# Wordle
 
-app.words = ['Castle','Spirit','Potato','Rocket','Window','Basket']
-app.word = random.choice(app.words)
-print(app.word)
+GRID_SIZE = 3
+CELL_SIZE = 400 / GRID_SIZE
+WINDOW_SIZE = 400
+filledCells = []
 
-app.characters = [' ',' ',' ',' ',' ',' ']
-# app.characters = ['_', '_', '_', '_', '_', '_']
-app.row = 1
+def createBoard(visible):
+    board = []
+    for i in range(GRID_SIZE):
+        row = []
+        for j in range(GRID_SIZE):
+            cell = Rect(j * CELL_SIZE, i * CELL_SIZE, CELL_SIZE, CELL_SIZE, fill=rgb(232, 191, 146), border='black', borderWidth=2, visible=visible)
+            row.append(cell)
+        board.append(row)
+    return board
 
-firstRow = Label(app.characters[0] + '   ' + app.characters[1] + '   ' + app.characters[2] + '   ' + app.characters[3] + '   ' + app.characters[4] + '   ' + app.characters[5], 200, 60, fill='black', size=30)
-secondRow = Label(app.characters[0] + '   ' + app.characters[1] + '   ' + app.characters[2] + '   ' + app.characters[3] + '   ' + app.characters[4] + '   ' + app.characters[5], 200, 100, fill='black', size=30)
-thirdRow = Label(app.characters[0] + '   ' + app.characters[1] + '   ' + app.characters[2] + '   ' + app.characters[3] + '   ' + app.characters[4] + '   ' + app.characters[5], 200, 140, fill='black', size=30)
-fourthRow = Label(app.characters[0] + '   ' + app.characters[1] + '   ' + app.characters[2] + '   ' + app.characters[3] + '   ' + app.characters[4] + '   ' + app.characters[5], 200, 180, fill='black', size=30)
-fifthRow = Label(app.characters[0] + '   ' + app.characters[1] + '   ' + app.characters[2] + '   ' + app.characters[3] + '   ' + app.characters[4] + '   ' + app.characters[5], 200, 220, fill='black', size=30)
-sixthRow = Label(app.characters[0] + '   ' + app.characters[1] + '   ' + app.characters[2] + '   ' + app.characters[3] + '   ' + app.characters[4] + '   ' + app.characters[5], 200, 260, fill='black', size=30)
+def drawX(cell):
+    padding = 20
+    cell_x = cell.centerX - cell.width / 2 + padding
+    cell_y = cell.centerY - cell.height / 2 + padding
+    cell_width = cell.width - 2 * padding
+    cell_height = cell.height - 2 * padding
+    
+    line1 = Line(cell_x, cell_y, cell_x + cell_width, cell_y + cell_height, lineWidth=2, fill='blue')
+    line2 = Line(cell_x + cell_width, cell_y, cell_x, cell_y + cell_height, lineWidth=2, fill='blue')
 
-lenWord = len(app.word)
-correctLetters = 0
 
-def update(row):
-    if row == 1:
-        firstRow.value = app.characters[0] + '   ' + app.characters[1] + '   ' + app.characters[2] + '   ' + app.characters[3] + '   ' + app.characters[4] + '   ' + app.characters[5]
-    if row == 2:
-        secondRow.value = app.characters[0] + '   ' + app.characters[1] + '   ' + app.characters[2] + '   ' + app.characters[3] + '   ' + app.characters[4] + '   ' + app.characters[5]
-    if row == 3:
-        thirdRow.value = app.characters[0] + '   ' + app.characters[1] + '   ' + app.characters[2] + '   ' + app.characters[3] + '   ' + app.characters[4] + '   ' + app.characters[5]
-    if row == 4:
-        fourthRow.value = app.characters[0] + '   ' + app.characters[1] + '   ' + app.characters[2] + '   ' + app.characters[3] + '   ' + app.characters[4] + '   ' + app.characters[5]
-    if row == 5:
-        fifthRow.value = app.characters[0] + '   ' + app.characters[1] + '   ' + app.characters[2] + '   ' + app.characters[3] + '   ' + app.characters[4] + '   ' + app.characters[5]
-    if row == 6:
-        sixthRow.value = app.characters[0] + '   ' + app.characters[1] + '   ' + app.characters[2] + '   ' + app.characters[3] + '   ' + app.characters[4] + '   ' + app.characters[5]
-     
+def drawO(cell):
+    padding = 20
+    cell_x = cell.centerX - cell.width / 2 + padding
+    cell_y = cell.centerY - cell.height / 2 + padding
+    cell_width = cell.width - 2 * padding
+    cell_height = cell.height - 2 * padding
+    
+    # Calculate radius based on half of the smaller dimension
+    if cell_width < cell_height:
+        radius = cell_width / 2
+    else:
+        radius = cell_height / 2
+    
+    circle = Circle(cell.centerX, cell.centerY, radius, fill=None, border='red', borderWidth=2)
 
-Grid = Group(
-    Rect(80,40,240,240, fill=None, border='black'),
-    Line(120,40,120,280),
-    Line(160,40,160,280),
-    Line(200,40,200,280),
-    Line(240,40,240,280),
-    Line(280,40,280,280),
-    Line(80,80,320,80),
-    Line(80,120,320,120),
-    Line(80,160,320,160),
-    Line(80,200,320,200),
-    Line(80,240,320,240))
+def onMousePress(mouseX, mouseY):
+    global turn, filledCells
+    for i in range(GRID_SIZE):
+        for j in range(GRID_SIZE):
+            cell = board[i][j]
+            if cell.contains(mouseX, mouseY) and [i, j] not in filledCells:
+                if turn == 'X':
+                    drawX(cell)
+                    turn = 'O'
+                else:
+                    drawO(cell)
+                    turn = 'X'
+                
+                filledCells.append([i, j])
 
-while correctLetters != lenWord:
-    userInput = app.getTextInput("Guess a word:")
+def main():
+    global board, turn, filledCells
+    board = createBoard(True)
+    turn = 'X'
+    filledCells = []
+
+main()
 
 cmu_graphics.run()
